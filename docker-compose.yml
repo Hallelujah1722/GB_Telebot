@@ -1,0 +1,53 @@
+version: "3.9"
+services:
+  telebot:
+    build: .
+    container_name: telebot_app
+    ports:
+      - '5555:5555'
+    restart: unless-stopped
+    depends_on:
+      - postgre_db
+      - pgAdmin4
+    networks:
+      - front
+      - mynet
+
+
+
+  postgre_db:
+    image: postgres:16.0
+    container_name: telebot_db
+    ports:
+      - '5432:5432'
+    restart: unless-stopped
+    environment:
+      - 'POSTGRES_USER=user'
+      - 'POSTGRES_PASSWORD=password'
+      - 'POSTGRES_DB=telebot_db'
+    volumes:
+      - './dumps/:/docker-entrypoint-initdb.d/'
+    networks:
+      - mynet
+      - front
+
+
+  pgAdmin4:
+    container_name: pgadmin_manager
+    image: dpage/pgadmin4:7.2
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@mail.ru"
+      PGADMIN_DEFAULT_PASSWORD: "admin"
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    ports:
+      - '5050:80'
+    restart: unless-stopped
+    networks:
+      - mynet
+
+networks:
+  mynet:
+    driver: bridge
+  front:
+    driver: bridge
+
